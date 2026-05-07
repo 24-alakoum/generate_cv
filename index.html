@@ -9,56 +9,57 @@
 </head>
 <body>
   <div class="app">
-    <!-- TOP NAV -->
+
+    <!-- TOP BAR -->
     <header class="topbar">
       <div class="topbar-inner">
         <div class="topbar-brand">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           <span>CV Pro</span>
         </div>
-
         <nav class="topbar-nav" id="topnav">
           <a href="#" class="nav-link active" data-tab="personal">Infos</a>
-          <a href="#" class="nav-link" data-tab="experience">Expérience</a>
-          <a href="#" class="nav-link" data-tab="education">Formation</a>
-          <a href="#" class="nav-link" data-tab="skills">Compétences</a>
-          <a href="#" class="nav-link" data-tab="projects">Projets</a>
-          <a href="#" class="nav-link" data-tab="languages">Langues</a>
-          <a href="#" class="nav-link" data-tab="certifications">Certifications</a>
+          <a href="#" class="nav-link" data-tab="experience">Exp.</a>
+          <a href="#" class="nav-link" data-tab="education">Form.</a>
+          <a href="#" class="nav-link" data-tab="skills">Comp.</a>
+          <a href="#" class="nav-link" data-tab="projects">Proj.</a>
+          <a href="#" class="nav-link" data-tab="languages">Lang.</a>
+          <a href="#" class="nav-link" data-tab="certifications">Cert.</a>
           <a href="#" class="nav-link" data-tab="template">Style</a>
         </nav>
-
-        <div class="topbar-actions">
-          <button class="top-action" onclick="showPreviewTab('score')" title="Score">
+        <div class="topbar-right">
+          <button class="top-action" onclick="showTab('score')" title="Score CV">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </button>
-          <button class="top-action" onclick="showPreviewTab('cover')" title="Lettre">
+          <button class="top-action" onclick="showTab('cover')" title="Lettre de motivation">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           </button>
-          <button class="top-action" onclick="exportPDF()" title="PDF">
+          <button class="top-action" onclick="showTab('analysis')" title="Analyse offre">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+          <button class="top-action" onclick="exportPDF()" title="Exporter PDF">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
           </button>
           <button class="top-action" onclick="resetAll()" title="Réinitialiser">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           </button>
+          <button class="topbar-hamburger" onclick="toggleMobileNav()">
+            <span></span><span></span><span></span>
+          </button>
         </div>
-
-        <button class="topbar-menu" onclick="toggleMobileNav()" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
       </div>
     </header>
 
-    <!-- MAIN -->
+    <!-- MAIN LAYOUT -->
     <div class="main">
       <!-- LEFT: FORM -->
-      <aside class="form-col">
+      <aside class="form-col" id="form-col">
         <div class="form-scroll">
 
           <div class="panel active" id="panel-personal">
             <div class="panel-head">
-              <h2>Informations</h2>
-              <span class="panel-badge" id="badge-personal">0%</span>
+              <h2>Informations personnelles</h2>
+              <span class="panel-badge" id="badge-personal">●</span>
             </div>
             <div class="field">
               <label for="fullname">Nom complet</label>
@@ -98,75 +99,55 @@
             </div>
             <div class="field">
               <label for="summary">Résumé professionnel</label>
-              <textarea id="summary" rows="4" placeholder="Décrivez votre profil en quelques phrases..."></textarea>
-              <span class="field-hint">Un bon résumé avec mots-clés améliore votre score ATS</span>
+              <textarea id="summary" rows="4" placeholder="Décrivez votre profil, vos années d'expérience et objectifs..."></textarea>
+              <span class="field-hint">Incluez des mots-clés du domaine pour passer les ATS</span>
             </div>
           </div>
 
           <div class="panel" id="panel-experience">
-            <div class="panel-head">
-              <h2>Expérience</h2>
-              <span class="panel-badge" id="badge-experience">0</span>
-            </div>
+            <div class="panel-head"><h2>Expérience</h2><span class="panel-badge" id="badge-experience">0</span></div>
             <div id="experience-list"></div>
-            <button class="btn-add" onclick="addExperience()">+ Ajouter</button>
+            <button class="btn-add" onclick="addExperience()">+ Ajouter une expérience</button>
           </div>
 
           <div class="panel" id="panel-education">
-            <div class="panel-head">
-              <h2>Formation</h2>
-              <span class="panel-badge" id="badge-education">0</span>
-            </div>
+            <div class="panel-head"><h2>Formation</h2><span class="panel-badge" id="badge-education">0</span></div>
             <div id="education-list"></div>
-            <button class="btn-add" onclick="addEducation()">+ Ajouter</button>
+            <button class="btn-add" onclick="addEducation()">+ Ajouter une formation</button>
           </div>
 
           <div class="panel" id="panel-skills">
-            <div class="panel-head">
-              <h2>Compétences</h2>
-              <span class="panel-badge" id="badge-skills">0</span>
-            </div>
+            <div class="panel-head"><h2>Compétences</h2><span class="panel-badge" id="badge-skills">0</span></div>
             <div id="skills-list"></div>
-            <button class="btn-add" onclick="addSkill()">+ Ajouter</button>
+            <button class="btn-add" onclick="addSkill()">+ Ajouter une compétence</button>
           </div>
 
           <div class="panel" id="panel-projects">
-            <div class="panel-head">
-              <h2>Projets</h2>
-              <span class="panel-badge" id="badge-projects">0</span>
-            </div>
+            <div class="panel-head"><h2>Projets</h2><span class="panel-badge" id="badge-projects">0</span></div>
             <div id="projects-list"></div>
-            <button class="btn-add" onclick="addProject()">+ Ajouter</button>
+            <button class="btn-add" onclick="addProject()">+ Ajouter un projet</button>
           </div>
 
           <div class="panel" id="panel-languages">
-            <div class="panel-head">
-              <h2>Langues</h2>
-              <span class="panel-badge" id="badge-languages">0</span>
-            </div>
+            <div class="panel-head"><h2>Langues</h2><span class="panel-badge" id="badge-languages">0</span></div>
             <div id="languages-list"></div>
-            <button class="btn-add" onclick="addLanguage()">+ Ajouter</button>
+            <button class="btn-add" onclick="addLanguage()">+ Ajouter une langue</button>
           </div>
 
           <div class="panel" id="panel-certifications">
-            <div class="panel-head">
-              <h2>Certifications</h2>
-              <span class="panel-badge" id="badge-certifications">0</span>
-            </div>
+            <div class="panel-head"><h2>Certifications</h2><span class="panel-badge" id="badge-certifications">0</span></div>
             <div id="certifications-list"></div>
-            <button class="btn-add" onclick="addCertification()">+ Ajouter</button>
+            <button class="btn-add" onclick="addCertification()">+ Ajouter une certification</button>
           </div>
 
           <div class="panel" id="panel-template">
-            <div class="panel-head">
-              <h2>Personnalisation</h2>
-            </div>
+            <div class="panel-head"><h2>Personnalisation</h2></div>
             <div class="field">
-              <label>Couleur principale</label>
+              <label>Couleurs</label>
               <div class="color-row">
-                <input type="color" id="primary-color" value="#1a365d">
-                <input type="color" id="accent-color" value="#2b6cb0">
-                <input type="color" id="bg-color" value="#f0f4f8">
+                <input type="color" id="primary-color" value="#1a365d" title="Principale">
+                <input type="color" id="accent-color" value="#2b6cb0" title="Accent">
+                <input type="color" id="bg-color" value="#f0f4f8" title="Fond page">
               </div>
             </div>
             <div class="field">
@@ -180,7 +161,7 @@
               </select>
             </div>
             <div class="field">
-              <label>Mise en page</label>
+              <label>Mise en page CV</label>
               <select id="cv-layout">
                 <option value="single">Colonne unique (ATS)</option>
                 <option value="two">Deux colonnes</option>
@@ -189,44 +170,35 @@
             <div class="field">
               <label class="toggle-label">
                 <span>Afficher la photo</span>
-                <label class="toggle">
-                  <input type="checkbox" id="show-photo-cv">
-                  <span class="toggle-slider"></span>
-                </label>
+                <label class="toggle"><input type="checkbox" id="show-photo-cv"><span class="toggle-slider"></span></label>
               </label>
             </div>
           </div>
-
         </div>
       </aside>
 
       <!-- RIGHT: PREVIEW -->
-      <main class="preview-col">
-        <div class="preview-toolbar">
-          <div class="preview-switch">
-            <button class="pv-btn active" onclick="showPreviewTab('cv')">CV</button>
-            <button class="pv-btn" onclick="showPreviewTab('cover')">Lettre</button>
-            <button class="pv-btn" onclick="showPreviewTab('score')">Score</button>
-          </div>
-          <div class="pv-score-badge" onclick="showPreviewTab('score')" title="Score CV">
-            <svg width="14" height="14" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" stroke-width="3"/>
-              <circle id="pv-score-ring" cx="18" cy="18" r="16" fill="none" stroke="#1a365d" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 100.531" transform="rotate(-90 18 18)"/>
-            </svg>
+      <main class="preview-col" id="preview-col">
+        <div class="pv-tabs">
+          <button class="pv-tab active" data-view="cv">CV</button>
+          <button class="pv-tab" data-view="cover">Lettre</button>
+          <button class="pv-tab" data-view="analysis">Analyse</button>
+          <button class="pv-tab" data-view="score">Score</button>
+          <div class="pv-score-mini" id="pv-score-mini" onclick="switchView('score')">
             <span id="pv-score-num">0</span>
           </div>
         </div>
 
-        <div class="preview-stage">
+        <div class="pv-stage">
           <!-- CV -->
-          <div class="preview-page active" id="page-cv">
+          <div class="pv-page active" id="page-cv">
             <div id="cv-content">
               <div class="cv-header">
-                <div class="cv-header-top">
+                <div class="cv-h-top">
                   <div class="cv-photo" id="cv-photo"></div>
                   <div>
                     <h1 id="cv-name">VOTRE NOM</h1>
-                    <p class="cv-subtitle" id="cv-title">Titre Professionnel</p>
+                    <p class="cv-sub" id="cv-title">Titre Professionnel</p>
                   </div>
                 </div>
                 <div class="cv-contact" id="cv-contact">
@@ -238,91 +210,97 @@
                 </div>
               </div>
               <div class="cv-body" id="cv-body">
-                <section id="cv-summary-section">
-                  <h2>Profil</h2>
-                  <p id="cv-summary">Votre résumé professionnel...</p>
-                </section>
-                <section id="cv-experience-section">
-                  <h2>Expérience Professionnelle</h2>
-                  <div id="cv-experience"></div>
-                </section>
-                <section id="cv-education-section">
-                  <h2>Formation</h2>
-                  <div id="cv-education"></div>
-                </section>
-                <section id="cv-projects-section">
-                  <h2>Projets</h2>
-                  <div id="cv-projects"></div>
-                </section>
-                <section id="cv-skills-section">
-                  <h2>Compétences</h2>
-                  <div id="cv-skills"></div>
-                </section>
-                <section id="cv-languages-section">
-                  <h2>Langues</h2>
-                  <div id="cv-languages"></div>
-                </section>
-                <section id="cv-certifications-section">
-                  <h2>Certifications</h2>
-                  <div id="cv-certifications"></div>
-                </section>
+                <section><h2>Profil</h2><p id="cv-summary">Votre résumé professionnel...</p></section>
+                <section><h2>Expérience Professionnelle</h2><div id="cv-experience"></div></section>
+                <section><h2>Formation</h2><div id="cv-education"></div></section>
+                <section><h2>Projets</h2><div id="cv-projects"></div></section>
+                <section><h2>Compétences</h2><div id="cv-skills"></div></section>
+                <section><h2>Langues</h2><div id="cv-languages"></div></section>
+                <section><h2>Certifications</h2><div id="cv-certifications"></div></section>
               </div>
             </div>
           </div>
 
-          <!-- COVER LETTER -->
-          <div class="preview-page" id="page-cover">
-            <div class="cover-form" id="cover-form">
-              <h2>Générer une lettre de motivation</h2>
+          <!-- COVER -->
+          <div class="pv-page" id="page-cover">
+            <div class="cover-card" id="cover-form-card">
+              <h2>Lettre de motivation</h2>
               <div class="field">
-                <label>Intitulé du poste</label>
-                <input type="text" id="job-title" placeholder="Développeur Full Stack Senior">
+                <label>Poste visé</label>
+                <input type="text" id="job-title" placeholder="Développeur Full Stack">
               </div>
               <div class="field">
                 <label>Entreprise</label>
                 <input type="text" id="job-company" placeholder="Tech Corp">
               </div>
               <div class="field">
-                <label>Description du poste</label>
-                <textarea id="job-description" rows="5" placeholder="Collez la description ici..."></textarea>
+                <label>Offre d'emploi</label>
+                <textarea id="job-description" rows="6" placeholder="Collez la description du poste ici..."></textarea>
               </div>
               <div class="field">
                 <label>Recruteur (optionnel)</label>
                 <input type="text" id="job-recruiter" placeholder="Mme Dupont">
               </div>
-              <button class="btn-gen" onclick="generateCoverLetter()">Générer la lettre</button>
+              <button class="btn-primary" onclick="generateCoverLetter()">Générer la lettre</button>
             </div>
             <div id="cover-result" style="display:none;">
               <div class="cover-bar">
-                <button class="btn-sm" onclick="exportCoverPDF()">Télécharger PDF</button>
-                <button class="btn-sm ghost" onclick="backToCoverForm()">Modifier</button>
+                <button class="btn-sm" onclick="exportCoverPDF()">PDF</button>
+                <button class="btn-sm ghost" onclick="document.getElementById('cover-result').style.display='none';document.getElementById('cover-form-card').style.display='block'">Modifier</button>
               </div>
               <div id="cover-letter-content" class="cover-letter"></div>
             </div>
           </div>
 
+          <!-- ANALYSIS -->
+          <div class="pv-page" id="page-analysis">
+            <div class="analysis-card">
+              <h2>Analyse offre vs CV</h2>
+              <p class="analysis-sub">Collez une offre d'emploi pour détecter les mots-clés présents et manquants dans votre CV.</p>
+              <div class="field">
+                <label>Offre d'emploi</label>
+                <textarea id="analysis-offer" rows="8" placeholder="Collez le texte complet de l'offre d'emploi ici..."></textarea>
+              </div>
+              <button class="btn-primary" onclick="runAnalysis()">Analyser</button>
+            </div>
+            <div id="analysis-result" style="display:none;">
+              <div class="analysis-summary" id="analysis-summary"></div>
+              <div class="analysis-sections">
+                <div class="analysis-col">
+                  <h3>Mots-clés présents ✓</h3>
+                  <div id="analysis-match" class="analysis-tags"></div>
+                </div>
+                <div class="analysis-col">
+                  <h3>Mots-clés manquants ✗</h3>
+                  <div id="analysis-miss" class="analysis-tags"></div>
+                  <p class="analysis-hint">Cliquez sur un mot-clé pour l'ajouter à vos compétences</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- SCORE -->
-          <div class="preview-page" id="page-score">
-            <div class="score-page">
+          <div class="pv-page" id="page-score">
+            <div class="score-card">
               <div class="score-hero">
-                <div class="score-ring-big">
+                <div class="s-ring">
                   <svg viewBox="0 0 120 120">
                     <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="8"/>
                     <circle id="score-arc" cx="60" cy="60" r="54" fill="none" stroke="#1a365d" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 339.292" transform="rotate(-90 60 60)"/>
                   </svg>
-                  <div class="score-val">
+                  <div class="s-val">
                     <span id="score-number">0</span>
                     <small>/100</small>
                   </div>
                 </div>
                 <div>
-                  <div class="score-grade" id="score-grade">—</div>
-                  <p class="score-desc" id="score-summary-text">Remplissez votre CV pour obtenir une évaluation</p>
+                  <div class="s-grade" id="score-grade">—</div>
+                  <p class="s-desc" id="score-summary-text">Remplissez votre CV</p>
                 </div>
               </div>
-              <div class="score-grid" id="score-breakdown"></div>
-              <div class="score-tips" id="score-tips">
-                <h3>Conseils d'amélioration</h3>
+              <div class="s-grid" id="score-breakdown"></div>
+              <div class="s-tips" id="score-tips">
+                <h3>Conseils</h3>
                 <ul id="score-tips-list"></ul>
               </div>
             </div>
