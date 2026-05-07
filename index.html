@@ -40,6 +40,9 @@
           <button class="top-action" onclick="exportPDF()" title="Exporter PDF">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
           </button>
+          <button class="top-action" onclick="toggleDarkMode()" title="Mode sombre" id="dark-toggle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
           <button class="top-action" onclick="resetAll()" title="Réinitialiser">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           </button>
@@ -161,7 +164,16 @@
               </select>
             </div>
             <div class="field">
-              <label>Mise en page CV</label>
+              <label>Template CV</label>
+              <select id="cv-template">
+                <option value="professional">Professionnel (ATS)</option>
+                <option value="modern">Moderne</option>
+                <option value="classic">Classique</option>
+                <option value="minimal">Minimaliste</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Mise en page</label>
               <select id="cv-layout">
                 <option value="single">Colonne unique (ATS)</option>
                 <option value="two">Deux colonnes</option>

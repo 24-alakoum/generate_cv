@@ -29,6 +29,180 @@ document.querySelectorAll('.pv-tab').forEach(tab => {
   tab.addEventListener('click', () => showTab(tab.dataset.view));
 });
 
+// ========== LOCAL STORAGE ==========
+const STORAGE_KEY = 'cvpro_data';
+
+function saveState() {
+  const data = { fields: {}, entries: {}, prefs: {}, photo: null };
+
+  // Simple fields
+  ['fullname','title','email','phone','address','linkedin','website','summary'].forEach(id => {
+    data.fields[id] = document.getElementById(id).value;
+  });
+
+  // Dynamic entries
+  const sections = {
+    experience: { list: 'experience-list', cls: ['exp-title','exp-company','exp-start','exp-end','exp-current','exp-desc'] },
+    education: { list: 'education-list', cls: ['edu-degree','edu-school','edu-start','edu-end','edu-desc'] },
+    projects: { list: 'projects-list', cls: ['proj-name','proj-tech','proj-url','proj-desc'] },
+    skills: { list: 'skills-list', cls: ['skill-name','skill-level'] },
+    languages: { list: 'languages-list', cls: ['lang-name','lang-level'] },
+    certifications: { list: 'certifications-list', cls: ['cert-name','cert-org','cert-date'] }
+  };
+
+  data.entries = {};
+  for (const [key, cfg] of Object.entries(sections)) {
+    data.entries[key] = [];
+    document.querySelectorAll('#' + cfg.list + ' > .entry, #' + cfg.list + ' > .skill-entry').forEach(el => {
+      const item = {};
+      cfg.cls.forEach(c => {
+        const input = el.querySelector('.' + c);
+        if (input) item[c] = input.type === 'checkbox' ? input.checked : input.value;
+      });
+      data.entries[key].push(item);
+    });
+  }
+
+  // Photo (base64)
+  const photoImg = document.querySelector('#cv-photo img');
+  if (photoImg) data.photo = photoImg.src;
+
+  // Cover letter fields
+  ['job-title','job-company','job-description','job-recruiter'].forEach(id => {
+    data.fields[id] = document.getElementById(id).value;
+  });
+
+  // Analysis field
+  data.fields['analysis-offer'] = document.getElementById('analysis-offer').value;
+
+  // Preferences
+  data.prefs = {
+    primaryColor: document.getElementById('primary-color').value,
+    accentColor: document.getElementById('accent-color').value,
+    bgColor: document.getElementById('bg-color').value,
+    fontFamily: document.getElementById('font-family').value,
+    cvLayout: document.getElementById('cv-layout').value,
+    cvTemplate: document.getElementById('cv-template').value,
+    showPhoto: document.getElementById('show-photo-cv').checked,
+    darkMode: document.body.classList.contains('dark')
+  };
+
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadState() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) {}
+  if (!data) return;
+
+  // Restore fields
+  if (data.fields) {
+    for (const [id, val] of Object.entries(data.fields)) {
+      const el = document.getElementById(id);
+      if (el) el.value = val || '';
+    }
+  }
+
+  // Restore entries
+  if (data.entries) {
+    const addFns = {
+      experience: addExperience, education: addEducation, projects: addProject,
+      skills: addSkill, languages: addLanguage, certifications: addCertification
+    };
+    const listIds = {
+      experience: 'experience-list', education: 'education-list', projects: 'projects-list',
+      skills: 'skills-list', languages: 'languages-list', certifications: 'certifications-list'
+    };
+
+    for (const [key, items] of Object.entries(data.entries)) {
+      const list = document.getElementById(listIds[key]);
+      list.innerHTML = '';
+      if (items.length === 0) { addFns[key](); continue; }
+      items.forEach(item => {
+        // Call add function then set values
+        addFns[key]();
+        const entries = list.querySelectorAll('.entry, .skill-entry');
+        const last = entries[entries.length - 1];
+        if (!last) return;
+        Object.entries(item).forEach(([cls, val]) => {
+          const el = last.querySelector('.' + cls);
+          if (el) {
+            if (el.type === 'checkbox') el.checked = !!val;
+            else el.value = val || '';
+          }
+        });
+      });
+    }
+  }
+
+  // Restore photo
+  if (data.photo) {
+    const c = document.getElementById('cv-photo');
+    c.innerHTML = '<img src="' + data.photo + '" alt="Photo">';
+  }
+
+  // Restore preferences
+  if (data.prefs) {
+    const p = data.prefs;
+    if (p.primaryColor) {
+      document.getElementById('primary-color').value = p.primaryColor;
+      document.querySelector(':root').style.setProperty('--primary', p.primaryColor);
+    }
+    if (p.accentColor) {
+      document.getElementById('accent-color').value = p.accentColor;
+      document.querySelector(':root').style.setProperty('--accent', p.accentColor);
+      document.querySelector(':root').style.setProperty('--primary-light', p.accentColor);
+    }
+    if (p.bgColor) {
+      document.getElementById('bg-color').value = p.bgColor;
+      document.querySelector(':root').style.setProperty('--bg', p.bgColor);
+      document.body.style.background = p.bgColor;
+      document.querySelector('.preview-col').style.background = p.bgColor;
+    }
+    if (p.fontFamily) {
+      document.getElementById('font-family').value = p.fontFamily;
+      document.getElementById('cv-content').style.fontFamily = p.fontFamily;
+    }
+    if (p.cvLayout) {
+      document.getElementById('cv-layout').value = p.cvLayout;
+      document.getElementById('cv-content').classList.toggle('two-column', p.cvLayout === 'two');
+    }
+    if (p.cvTemplate) {
+      document.getElementById('cv-template').value = p.cvTemplate;
+      applyTemplate(p.cvTemplate);
+    }
+    if (p.showPhoto !== undefined) {
+      document.getElementById('show-photo-cv').checked = p.showPhoto;
+    }
+    if (p.darkMode) {
+      document.body.classList.add('dark');
+    }
+  }
+}
+
+// ========== DARK MODE ==========
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  saveState();
+}
+
+// ========== TEMPLATES ==========
+document.getElementById('cv-template').addEventListener('change', function() {
+  applyTemplate(this.value);
+  saveState();
+});
+
+function applyTemplate(tpl) {
+  const cv = document.getElementById('cv-content');
+  cv.className = cv.className
+    .replace(/professional|modern|classic|minimal/g, '')
+    .replace(/\s+/g, ' ').trim();
+  if (tpl !== 'professional') cv.classList.add(tpl);
+  // Re-apply two-column
+  if (document.getElementById('cv-layout').value === 'two') cv.classList.add('two-column');
+  applyColors();
+}
+
 // ========== FORM EVENTS ==========
 document.addEventListener('input', scheduleUpdate);
 document.addEventListener('change', scheduleUpdate);
@@ -36,7 +210,10 @@ document.addEventListener('change', scheduleUpdate);
 let updateTimer;
 function scheduleUpdate() {
   clearTimeout(updateTimer);
-  updateTimer = setTimeout(updatePreview, 80);
+  updateTimer = setTimeout(() => {
+    updatePreview();
+    saveState();
+  }, 80);
 }
 
 function updatePreview() {
@@ -627,9 +804,12 @@ function resetAll() {
   document.getElementById('cv-content').style.fontFamily = '';
   document.getElementById('cv-layout').value = 'single';
   document.getElementById('cv-content').classList.remove('two-column');
+  document.getElementById('cv-template').value = 'professional';
+  document.getElementById('cv-content').className = '';
   document.getElementById('show-photo-cv').checked = false;
   document.getElementById('cv-photo').innerHTML = '';
   document.getElementById('cv-photo').classList.remove('show');
+  document.body.classList.remove('dark');
   backToCoverForm();
   document.getElementById('job-title').value = '';
   document.getElementById('job-company').value = '';
@@ -637,6 +817,7 @@ function resetAll() {
   document.getElementById('job-recruiter').value = '';
   document.getElementById('analysis-offer').value = '';
   document.getElementById('analysis-result').style.display = 'none';
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
   updatePreview();
 }
 
@@ -654,5 +835,12 @@ for (const [k, name] of Object.entries(CAT_NAMES)) {
     '<div class="s-bar"><div class="s-fill" style="width:0%"></div></div><div class="s-item-d"></div></div>';
 }
 
-addExperience(); addEducation(); addProject(); addSkill(); addLanguage(); addCertification();
+// Load saved data first
+loadState();
+
+// If no saved data, add default empty entries
+const hasEntries = document.querySelectorAll('#experience-list .entry').length > 0;
+if (!hasEntries) {
+  addExperience(); addEducation(); addProject(); addSkill(); addLanguage(); addCertification();
+}
 updatePreview();
