@@ -1,3 +1,388 @@
+// ========== AUTH STATE ==========
+let API = '';
+let TOKEN = localStorage.getItem('cvpro_token');
+let USER = JSON.parse(localStorage.getItem('cvpro_user') || 'null');
+let currentCVId = null;
+
+function isLoggedIn() { return !!TOKEN; }
+
+function apiHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  if (TOKEN) h['Authorization'] = 'Bearer ' + TOKEN;
+  return h;
+}
+
+async function apiCall(method, path, body) {
+  try {
+    const res = await fetch(API + '/api' + path, {
+      method, headers: apiHeaders(),
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = await res.json();
+    if (!res.ok) { throw new Error(data.error || 'Erreur serveur'); }
+    return data;
+  } catch (e) {
+    if (e.message.includes('token') || e.message.includes('Authentification')) {
+      logout();
+    }
+    throw e;
+  }
+}
+
+// ========== AUTH ==========
+function showAuthForm(form) {
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  document.getElementById('form-' + form).classList.add('active');
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('register-error').textContent = '';
+}
+
+async function login() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  if (!email || !password) { errEl.textContent = 'Remplissez tous les champs'; return; }
+
+  try {
+    const data = await apiCall('POST', '/auth/login', { email, password });
+    TOKEN = data.token;
+    USER = data.user;
+    localStorage.setItem('cvpro_token', TOKEN);
+    localStorage.setItem('cvpro_user', JSON.stringify(USER));
+    enterApp();
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+async function register() {
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  const errEl = document.getElementById('register-error');
+  if (!name || !email || !password) { errEl.textContent = 'Remplissez tous les champs'; return; }
+  if (password.length < 6) { errEl.textContent = 'Mot de passe trop court (6+ caractères)'; return; }
+
+  try {
+    const data = await apiCall('POST', '/auth/register', { name, email, password });
+    TOKEN = data.token;
+    USER = data.user;
+    localStorage.setItem('cvpro_token', TOKEN);
+    localStorage.setItem('cvpro_user', JSON.stringify(USER));
+    enterApp();
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+function logout() {
+  TOKEN = null;
+  USER = null;
+  localStorage.removeItem('cvpro_token');
+  localStorage.removeItem('cvpro_user');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-overlay').style.display = 'flex';
+}
+
+function enterApp() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('user-initial').textContent = (USER.name || 'U')[0].toUpperCase();
+  document.getElementById('user-name-display').textContent = USER.name || 'Utilisateur';
+  document.getElementById('admin-btn').style.display = USER.role === 'admin' ? 'block' : 'none';
+  updateCredits();
+  loadCVList();
+}
+
+function toggleUserMenu() {
+  document.getElementById('user-menu').classList.toggle('show');
+}
+
+// Close user menu on click outside
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('user-menu');
+  const userBtn = document.querySelector('.topbar-user');
+  if (menu && userBtn && !userBtn.contains(e.target)) {
+    menu.classList.remove('show');
+  }
+});
+
+function updateCredits() {
+  const count = document.getElementById('credits-count');
+  if (count && USER) count.textContent = USER.credits || 0;
+  const dash = document.getElementById('dash-credits');
+  if (dash) dash.textContent = USER.credits || 0;
+}
+
+// ========== DASHBOARD ==========
+function showDashboard() {
+  document.getElementById('dashboard-view').style.display = 'block';
+  document.getElementById('admin-view').style.display = 'none';
+  document.getElementById('form-col').style.display = 'none';
+  document.getElementById('preview-col').style.display = 'none';
+  loadCVList();
+}
+
+function closeDashboard() {
+  document.getElementById('dashboard-view').style.display = 'none';
+  document.getElementById('form-col').style.display = 'block';
+  document.getElementById('preview-col').style.display = 'flex';
+}
+
+async function loadCVList() {
+  const grid = document.getElementById('cv-list');
+  if (!grid) return;
+  try {
+    const cvs = await apiCall('GET', '/cvs');
+    if (cvs.length === 0) {
+      grid.innerHTML = `<div class="dash-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h3>Aucun CV pour le moment</h3>
+        <p>Créez votre premier CV</p>
+        <button class="btn-primary" onclick="closeDashboard()">Créer un CV</button>
+      </div>`;
+      return;
+    }
+    grid.innerHTML = cvs.map(cv => `
+      <div class="dash-card" onclick="loadCV('${cv.id}')">
+        <h3>${cv.name}</h3>
+        <p>Template: ${cv.template}</p>
+        <div class="dash-meta"><span>${cv.created_at}</span></div>
+        <div class="dash-actions">
+          <button class="btn-sm" onclick="event.stopPropagation();loadCV('${cv.id}')">Ouvrir</button>
+          <button class="btn-sm ghost" onclick="event.stopPropagation();deleteCV('${cv.id}')" style="color:#e53e3e">Supprimer</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    showToast('Erreur chargement CVs', 'error');
+  }
+}
+
+async function loadCV(id) {
+  try {
+    const cv = await apiCall('GET', '/cvs/' + id);
+    currentCVId = id;
+    // Restore form data from cv.data
+    if (cv.data) {
+      // Reset and fill
+      resetAllSilent();
+      setTimeout(() => {
+        const data = cv.data;
+        for (const [field, val] of Object.entries(data.fields || {})) {
+          const el = document.getElementById(field);
+          if (el) el.value = val || '';
+        }
+        // Restore entries
+        if (data.entries) {
+          for (const [key, items] of Object.entries(data.entries)) {
+            const listId = key + '-list';
+            const list = document.getElementById(listId);
+            if (!list) continue;
+            list.innerHTML = '';
+            items.forEach(item => {
+              const fn = window['add' + key.charAt(0).toUpperCase() + key.slice(1)];
+              if (fn) fn();
+              const entries = list.querySelectorAll('.entry, .skill-entry');
+              const last = entries[entries.length - 1];
+              if (!last) return;
+              Object.entries(item).forEach(([cls, val]) => {
+                const el = last.querySelector('.' + cls);
+                if (el) {
+                  if (el.type === 'checkbox') el.checked = !!val;
+                  else el.value = val || '';
+                }
+              });
+            });
+          }
+        }
+        updatePreview();
+        closeDashboard();
+      }, 100);
+    }
+  } catch (e) {
+    showToast('Erreur chargement CV', 'error');
+  }
+}
+
+async function deleteCV(id) {
+  if (!confirm('Supprimer ce CV ?')) return;
+  try {
+    await apiCall('DELETE', '/cvs/' + id);
+    loadCVList();
+    showToast('CV supprimé', 'success');
+  } catch (e) {
+    showToast('Erreur suppression', 'error');
+  }
+}
+
+async function saveCV() {
+  if (!USER) return;
+  const name = prompt('Nom du CV:', 'Mon CV');
+  if (!name) return;
+
+  // Collect all data
+  const data = collectFormData();
+
+  try {
+    const result = await apiCall('POST', '/cvs', { name, data, template: document.getElementById('cv-template').value });
+    currentCVId = result.id;
+    USER.credits = result.credits || USER.credits;
+    localStorage.setItem('cvpro_user', JSON.stringify(USER));
+    updateCredits();
+    showToast('CV sauvegardé ✓', 'success');
+  } catch (e) {
+    if (e.message.includes('Crédits')) {
+      showToast('Crédits insuffisants', 'error');
+      setTimeout(showPaymentModal, 500);
+    } else {
+      showToast('Erreur: ' + e.message, 'error');
+    }
+  }
+}
+
+function collectFormData() {
+  const fields = {};
+  ['fullname','title','email','phone','address','linkedin','website','summary'].forEach(id => {
+    fields[id] = document.getElementById(id).value;
+  });
+  const entries = {};
+  const sections = {
+    experience: ['exp-title','exp-company','exp-start','exp-end','exp-current','exp-desc'],
+    education: ['edu-degree','edu-school','edu-start','edu-end','edu-desc'],
+    projects: ['proj-name','proj-tech','proj-url','proj-desc'],
+    skills: ['skill-name','skill-level'],
+    languages: ['lang-name','lang-level'],
+    certifications: ['cert-name','cert-org','cert-date']
+  };
+  for (const [key, cls] of Object.entries(sections)) {
+    entries[key] = [];
+    document.querySelectorAll('#' + key + '-list > .entry, #' + key + '-list > .skill-entry').forEach(el => {
+      const item = {};
+      cls.forEach(c => {
+        const inp = el.querySelector('.' + c);
+        if (inp) item[c] = inp.type === 'checkbox' ? inp.checked : inp.value;
+      });
+      entries[key].push(item);
+    });
+  }
+  return { fields, entries };
+}
+
+function resetAllSilent() {
+  document.querySelectorAll('#panel-personal input, #panel-personal textarea').forEach(el => { el.value = ''; });
+  ['experience-list','education-list','projects-list','skills-list','languages-list','certifications-list'].forEach(id => {
+    document.getElementById(id).innerHTML = '';
+  });
+  document.getElementById('cv-photo').innerHTML = '';
+}
+
+// ========== ADMIN ==========
+async function showAdmin() {
+  document.getElementById('admin-view').style.display = 'block';
+  document.getElementById('dashboard-view').style.display = 'none';
+  document.getElementById('form-col').style.display = 'none';
+  document.getElementById('preview-col').style.display = 'none';
+  document.getElementById('user-menu').classList.remove('show');
+  loadAdminData();
+}
+
+function closeAdmin() {
+  document.getElementById('admin-view').style.display = 'none';
+  document.getElementById('form-col').style.display = 'block';
+  document.getElementById('preview-col').style.display = 'flex';
+}
+
+async function loadAdminData() {
+  try {
+    const stats = await apiCall('GET', '/admin/dashboard');
+    const statsEl = document.getElementById('admin-stats');
+    statsEl.innerHTML = `
+      <div class="admin-stat"><div class="num">${stats.users.total}</div><div class="label">Utilisateurs</div></div>
+      <div class="admin-stat"><div class="num">${stats.users.today}</div><div class="label">Aujourd'hui</div></div>
+      <div class="admin-stat"><div class="num">${stats.cvs.total}</div><div class="label">CVs générés</div></div>
+      <div class="admin-stat"><div class="num">${stats.cvs.today}</div><div class="label">CVs aujourd'hui</div></div>
+      <div class="admin-stat"><div class="num">${stats.payments.total}</div><div class="label">Paiements</div></div>
+      <div class="admin-stat"><div class="num">${stats.payments.revenue/100}€</div><div class="label">Revenus</div></div>
+      <div class="admin-stat"><div class="num">${stats.coverLetters}</div><div class="label">Lettres</div></div>
+      <div class="admin-stat"><div class="num">${Math.round(stats.credits.avg||0)}</div><div class="label">Crédits moyen</div></div>
+    `;
+
+    // Users table
+    const users = await apiCall('GET', '/admin/users');
+    document.getElementById('admin-users').innerHTML = users.length ? `
+      <table><tr><th>Email</th><th>Nom</th><th>Crédits</th><th>Inscription</th></tr>
+      ${users.map(u => `<tr><td>${u.email}</td><td>${u.name}</td><td>${u.credits}</td><td>${u.created_at}</td></tr>`).join('')}
+      </table>` : '<p>Aucun utilisateur</p>';
+
+    // Payments table
+    const payments = await apiCall('GET', '/admin/payments');
+    document.getElementById('admin-payments').innerHTML = payments.length ? `
+      <table><tr><th>Utilisateur</th><th>Montant</th><th>Crédits</th><th>Date</th></tr>
+      ${payments.map(p => `<tr><td>${p.user_email}</td><td>${p.amount/100}€</td><td>${p.credits}</td><td>${p.created_at}</td></tr>`).join('')}
+      </table>` : '<p>Aucun paiement</p>';
+
+  } catch (e) {
+    showToast('Erreur chargement admin', 'error');
+  }
+}
+
+// ========== PAYMENT ==========
+function showPaymentModal() {
+  document.getElementById('payment-overlay').style.display = 'flex';
+  document.getElementById('modal-credits').textContent = USER.credits || 0;
+
+  const plansEl = document.getElementById('plans-list');
+  const plans = { starter: { name: 'Starter', credits: 5, price: '4,99' }, pro: { name: 'Pro', credits: 15, price: '9,99' }, unlimited: { name: 'Illimité', credits: 50, price: '19,99' } };
+  plansEl.innerHTML = Object.entries(plans).map(([key, p]) => `
+    <div class="plan-card" onclick="buyPlan('${key}')">
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-credits">${p.credits}</div>
+      <div class="plan-price">${p.price}€ <small>HT</small></div>
+    </div>
+  `).join('');
+}
+
+function closePaymentModal(e) {
+  if (e && e.target !== document.getElementById('payment-overlay')) return;
+  document.getElementById('payment-overlay').style.display = 'none';
+}
+
+async function buyPlan(plan) {
+  try {
+    const result = await apiCall('POST', '/payment/checkout', { plan });
+    if (result.url) {
+      window.location.href = result.url;
+    } else if (result.success) {
+      USER.credits = result.credits;
+      localStorage.setItem('cvpro_user', JSON.stringify(USER));
+      updateCredits();
+      document.getElementById('modal-credits').textContent = USER.credits;
+      showToast(result.message, 'success');
+      setTimeout(closePaymentModal, 1000);
+    }
+  } catch (e) {
+    showToast('Erreur paiement: ' + e.message, 'error');
+  }
+}
+
+// ========== TOAST ==========
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'info');
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ========== INIT AUTH ==========
+if (isLoggedIn() && USER) {
+  document.addEventListener('DOMContentLoaded', () => {
+    enterApp();
+  });
+}
+
 // ========== NAV ==========
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', e => {

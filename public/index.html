@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Pro — Générateur intelligent</title>
+  <link rel="stylesheet" href="style.css?v=2">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-modal" id="auth-modal">
+    <!-- Login -->
+    <div class="auth-form active" id="form-login">
+      <div class="auth-header">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h2>CV Pro</h2>
+        <p>Connectez-vous pour continuer</p>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="votre@email.com">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary btn-full" onclick="login()">Se connecter</button>
+      <p class="auth-switch">Pas encore de compte ? <a href="#" onclick="showAuthForm('register')">S'inscrire</a></p>
+      <p id="login-error" class="auth-error"></p>
+    </div>
+
+    <!-- Register -->
+    <div class="auth-form" id="form-register">
+      <div class="auth-header">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h2>Créer un compte</h2>
+        <p>3 crédits gratuits offerts</p>
+      </div>
+      <div class="field">
+        <label>Nom complet</label>
+        <input type="text" id="register-name" placeholder="Jean Dupont">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="register-email" placeholder="votre@email.com">
+      </div>
+      <div class="field">
+        <label>Mot de passe (6+ caractères)</label>
+        <input type="password" id="register-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary btn-full" onclick="register()">Créer mon compte</button>
+      <p class="auth-switch">Déjà un compte ? <a href="#" onclick="showAuthForm('login')">Se connecter</a></p>
+      <p id="register-error" class="auth-error"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div class="app" id="app" style="display:none">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand" onclick="showDashboard()" style="cursor:pointer">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>CV Pro</span>
+      </div>
+      <nav class="topbar-nav" id="topnav">
+        <a href="#" class="nav-link active" data-tab="personal">Infos</a>
+        <a href="#" class="nav-link" data-tab="experience">Exp.</a>
+        <a href="#" class="nav-link" data-tab="education">Form.</a>
+        <a href="#" class="nav-link" data-tab="skills">Comp.</a>
+        <a href="#" class="nav-link" data-tab="projects">Proj.</a>
+        <a href="#" class="nav-link" data-tab="languages">Lang.</a>
+        <a href="#" class="nav-link" data-tab="certifications">Cert.</a>
+        <a href="#" class="nav-link" data-tab="template">Style</a>
+      </nav>
+      <div class="topbar-right">
+        <span class="topbar-credits" id="credits-badge" onclick="showPaymentModal()" title="Crédits">◎ <span id="credits-count">0</span></span>
+        <button class="top-action" onclick="showTab('score')" title="Score CV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </button>
+        <button class="top-action" onclick="showTab('cover')" title="Lettre">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </button>
+        <button class="top-action" onclick="showTab('analysis')" title="Analyse">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <button class="top-action" onclick="exportPDF()" title="PDF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
+        </button>
+        <button class="top-action" onclick="toggleDarkMode()" title="Mode sombre" id="dark-toggle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="topbar-user" onclick="toggleUserMenu()">
+          <span id="user-initial">U</span>
+          <span class="user-name" id="user-name-display">Utilisateur</span>
+        </div>
+        <div class="user-menu" id="user-menu">
+          <button onclick="showDashboard()">Mes CVs</button>
+          <button onclick="showPaymentModal()">Acheter des crédits</button>
+          <button id="admin-btn" style="display:none" onclick="showAdmin()">Administration</button>
+          <button onclick="logout()">Déconnexion</button>
+        </div>
+        <button class="topbar-hamburger" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- DASHBOARD VIEW -->
+    <div class="dashboard" id="dashboard-view" style="display:none">
+      <div class="dash-header">
+        <h2>Mes CVs</h2>
+        <div class="dash-actions">
+          <span class="credit-display">◎ <span id="dash-credits">0</span> crédits</span>
+          <button class="btn-sm" onclick="showPaymentModal()">+ Acheter</button>
+          <button class="btn-sm primary" onclick="closeDashboard()">+ Nouveau CV</button>
+        </div>
+      </div>
+      <div class="dash-grid" id="cv-list">
+        <div class="dash-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <h3>Aucun CV pour le moment</h3>
+          <p>Créez votre premier CV en cliquant ci-dessous</p>
+          <button class="btn-primary" onclick="closeDashboard()">Créer un CV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div class="admin-view" id="admin-view" style="display:none">
+      <div class="admin-header">
+        <h2>Administration</h2>
+        <button class="btn-sm ghost" onclick="closeAdmin()">← Retour</button>
+      </div>
+      <div class="admin-stats" id="admin-stats"></div>
+      <div class="admin-tables">
+        <div class="admin-table-wrap">
+          <h3>Derniers utilisateurs</h3>
+          <div id="admin-users"></div>
+        </div>
+        <div class="admin-table-wrap">
+          <h3>Paiements récents</h3>
+          <div id="admin-payments"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="payment-overlay" id="payment-overlay" style="display:none" onclick="closePaymentModal(event)">
+      <div class="payment-modal" onclick="event.stopPropagation()">
+        <button class="payment-close" onclick="closePaymentModal()">×</button>
+        <h2>Obtenir des crédits</h2>
+        <p class="payment-sub">Chaque CV généré consomme 1 crédit. Vos CVs sauvegardés sont accessibles à vie.</p>
+        <div class="plans" id="plans-list"></div>
+        <div class="payment-current">Crédits actuels : <strong id="modal-credits">0</strong></div>
+      </div>
+    </div>
+
+    <!-- FORM COL -->
+    <aside class="form-col" id="form-col">
+      <div class="form-scroll">
+        <div class="panel active" id="panel-personal">
+          <div class="panel-head"><h2>Informations personnelles</h2><span class="panel-badge" id="badge-personal">●</span></div>
+          <div class="field"><label for="fullname">Nom complet</label><input type="text" id="fullname" placeholder="Jean Dupont"></div>
+          <div class="field"><label for="title">Titre professionnel</label><input type="text" id="title" placeholder="Développeur Full Stack"></div>
+          <div class="field-row">
+            <div class="field"><label for="email">Email</label><input type="email" id="email" placeholder="jean@email.com"></div>
+            <div class="field"><label for="phone">Téléphone</label><input type="tel" id="phone" placeholder="+33 6 12 34 56 78"></div>
+          </div>
+          <div class="field"><label for="address">Adresse</label><input type="text" id="address" placeholder="Paris, France"></div>
+          <div class="field-row">
+            <div class="field"><label for="linkedin">LinkedIn</label><input type="url" id="linkedin" placeholder="linkedin.com/in/jeandupont"></div>
+            <div class="field"><label for="website">Site web</label><input type="url" id="website" placeholder="jeandupont.com"></div>
+          </div>
+          <div class="field"><label for="photo">Photo</label><input type="file" id="photo" accept="image/*"></div>
+          <div class="field"><label for="summary">Résumé professionnel</label><textarea id="summary" rows="4" placeholder="Décrivez votre profil..."></textarea></div>
+        </div>
+        <div class="panel" id="panel-experience"><div class="panel-head"><h2>Expérience</h2><span class="panel-badge" id="badge-experience">0</span></div><div id="experience-list"></div><button class="btn-add" onclick="addExperience()">+ Ajouter</button></div>
+        <div class="panel" id="panel-education"><div class="panel-head"><h2>Formation</h2><span class="panel-badge" id="badge-education">0</span></div><div id="education-list"></div><button class="btn-add" onclick="addEducation()">+ Ajouter</button></div>
+        <div class="panel" id="panel-skills"><div class="panel-head"><h2>Compétences</h2><span class="panel-badge" id="badge-skills">0</span></div><div id="skills-list"></div><button class="btn-add" onclick="addSkill()">+ Ajouter</button></div>
+        <div class="panel" id="panel-projects"><div class="panel-head"><h2>Projets</h2><span class="panel-badge" id="badge-projects">0</span></div><div id="projects-list"></div><button class="btn-add" onclick="addProject()">+ Ajouter</button></div>
+        <div class="panel" id="panel-languages"><div class="panel-head"><h2>Langues</h2><span class="panel-badge" id="badge-languages">0</span></div><div id="languages-list"></div><button class="btn-add" onclick="addLanguage()">+ Ajouter</button></div>
+        <div class="panel" id="panel-certifications"><div class="panel-head"><h2>Certifications</h2><span class="panel-badge" id="badge-certifications">0</span></div><div id="certifications-list"></div><button class="btn-add" onclick="addCertification()">+ Ajouter</button></div>
+        <div class="panel" id="panel-template">
+          <div class="panel-head"><h2>Personnalisation</h2></div>
+          <div class="field"><label>Couleurs</label><div class="color-row"><input type="color" id="primary-color" value="#1a365d"><input type="color" id="accent-color" value="#2b6cb0"><input type="color" id="bg-color" value="#f0f4f8"></div></div>
+          <div class="field"><label>Police</label><select id="font-family"><option value="Arial, Helvetica, sans-serif">Arial (ATS)</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="Georgia, serif">Georgia</option><option value="'Segoe UI', sans-serif">Segoe UI</option><option value="'Calibri', sans-serif">Calibri</option></select></div>
+          <div class="field"><label>Template</label><select id="cv-template"><option value="professional">Professionnel (ATS)</option><option value="modern">Moderne</option><option value="classic">Classique</option><option value="minimal">Minimaliste</option></select></div>
+          <div class="field"><label>Mise en page</label><select id="cv-layout"><option value="single">Colonne unique (ATS)</option><option value="two">Deux colonnes</option></select></div>
+          <div class="field"><label class="toggle-label"><span>Afficher la photo</span><label class="toggle"><input type="checkbox" id="show-photo-cv"><span class="toggle-slider"></span></label></label></div>
+          <div class="field"><button class="btn-sm primary btn-full" onclick="saveCV()">💾 Sauvegarder ce CV</button></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PREVIEW COL -->
+    <main class="preview-col">
+      <div class="pv-tabs">
+        <button class="pv-tab active" data-view="cv">CV</button>
+        <button class="pv-tab" data-view="cover">Lettre</button>
+        <button class="pv-tab" data-view="analysis">Analyse</button>
+        <button class="pv-tab" data-view="score">Score</button>
+        <div class="pv-score-mini" onclick="showTab('score')"><span id="pv-score-num">0</span></div>
+      </div>
+      <div class="pv-stage">
+        <div class="pv-page active" id="page-cv">
+          <div id="cv-content">
+            <div class="cv-header">
+              <div class="cv-h-top"><div class="cv-photo" id="cv-photo"></div><div><h1 id="cv-name">VOTRE NOM</h1><p class="cv-sub" id="cv-title">Titre Professionnel</p></div></div>
+              <div class="cv-contact" id="cv-contact"><span id="cv-email">email@example.com</span><span id="cv-phone">+33 6 00 00 00 00</span><span id="cv-address">Ville, Pays</span><span id="cv-linkedin">linkedin</span><span id="cv-website">siteweb.com</span></div>
+            </div>
+            <div class="cv-body" id="cv-body">
+              <section><h2>Profil</h2><p id="cv-summary">Votre résumé professionnel...</p></section>
+              <section><h2>Expérience</h2><div id="cv-experience"></div></section>
+              <section><h2>Formation</h2><div id="cv-education"></div></section>
+              <section><h2>Projets</h2><div id="cv-projects"></div></section>
+              <section><h2>Compétences</h2><div id="cv-skills"></div></section>
+              <section><h2>Langues</h2><div id="cv-languages"></div></section>
+              <section><h2>Certifications</h2><div id="cv-certifications"></div></section>
+            </div>
+          </div>
+        </div>
+        <div class="pv-page" id="page-cover">
+          <div class="cover-card" id="cover-form-card">
+            <h2>Lettre de motivation</h2>
+            <div class="field"><label>Poste visé</label><input type="text" id="job-title" placeholder="Développeur Full Stack"></div>
+            <div class="field"><label>Entreprise</label><input type="text" id="job-company" placeholder="Tech Corp"></div>
+            <div class="field"><label>Offre d'emploi</label><textarea id="job-description" rows="6" placeholder="Collez la description..."></textarea></div>
+            <div class="field"><label>Recruteur (optionnel)</label><input type="text" id="job-recruiter" placeholder="Mme Dupont"></div>
+            <button class="btn-primary" onclick="generateCoverLetter()">Générer la lettre</button>
+          </div>
+          <div id="cover-result" style="display:none">
+            <div class="cover-bar"><button class="btn-sm" onclick="exportCoverPDF()">PDF</button><button class="btn-sm ghost" onclick="document.getElementById('cover-result').style.display='none';document.getElementById('cover-form-card').style.display='block'">Modifier</button></div>
+            <div id="cover-letter-content" class="cover-letter"></div>
+          </div>
+        </div>
+        <div class="pv-page" id="page-analysis">
+          <div class="analysis-card">
+            <h2>Analyse offre vs CV</h2>
+            <p class="analysis-sub">Collez une offre pour détecter les mots-clés présents et manquants.</p>
+            <div class="field"><label>Offre d'emploi</label><textarea id="analysis-offer" rows="8" placeholder="Collez l'offre ici..."></textarea></div>
+            <button class="btn-primary" onclick="runAnalysis()">Analyser</button>
+          </div>
+          <div id="analysis-result" style="display:none">
+            <div class="analysis-summary" id="analysis-summary"></div>
+            <div class="analysis-sections">
+              <div class="analysis-col"><h3>Mots-clés présents ✓</h3><div id="analysis-match" class="analysis-tags"></div></div>
+              <div class="analysis-col"><h3>Mots-clés manquants ✗</h3><div id="analysis-miss" class="analysis-tags"></div><p class="analysis-hint">Cliquez pour ajouter</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="pv-page" id="page-score">
+          <div class="score-card">
+            <div class="score-hero">
+              <div class="s-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="8"/><circle id="score-arc" cx="60" cy="60" r="54" fill="none" stroke="#1a365d" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 339.292" transform="rotate(-90 60 60)"/></svg><div class="s-val"><span id="score-number">0</span><small>/100</small></div></div>
+              <div><div class="s-grade" id="score-grade">—</div><p class="s-desc" id="score-summary-text">Remplissez votre CV</p></div>
+            </div>
+            <div class="s-grid" id="score-breakdown"></div>
+            <div class="s-tips" id="score-tips"><h3>Conseils</h3><ul id="score-tips-list"></ul></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js?v=2"></script>
+</body>
+</html>
