@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur de CV</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Générateur de CV</h1>
+      <p>Créez un CV professionnel en quelques minutes</p>
+    </header>
+
+    <div class="container">
+      <aside class="sidebar">
+        <nav class="tabs">
+          <button class="tab active" data-tab="personal">Informations</button>
+          <button class="tab" data-tab="experience">Expérience</button>
+          <button class="tab" data-tab="education">Formation</button>
+          <button class="tab" data-tab="skills">Compétences</button>
+          <button class="tab" data-tab="languages">Langues</button>
+          <button class="tab" data-tab="certifications">Certifications</button>
+          <button class="tab" data-tab="template">Template</button>
+        </nav>
+
+        <div class="tab-content active" id="tab-personal">
+          <h2>Informations personnelles</h2>
+          <div class="form-group">
+            <label for="fullname">Nom complet</label>
+            <input type="text" id="fullname" placeholder="Jean Dupont">
+          </div>
+          <div class="form-group">
+            <label for="title">Titre professionnel</label>
+            <input type="text" id="title" placeholder="Développeur Full Stack">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="jean@email.com">
+            </div>
+            <div class="form-group">
+              <label for="phone">Téléphone</label>
+              <input type="tel" id="phone" placeholder="+33 6 12 34 56 78">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="address">Adresse</label>
+            <input type="text" id="address" placeholder="Paris, France">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="linkedin">LinkedIn</label>
+              <input type="url" id="linkedin" placeholder="linkedin.com/in/jeandupont">
+            </div>
+            <div class="form-group">
+              <label for="website">Site web</label>
+              <input type="url" id="website" placeholder="jeandupont.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="photo">Photo</label>
+            <input type="file" id="photo" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label for="summary">Résumé professionnel</label>
+            <textarea id="summary" rows="4" placeholder="Décrivez votre profil en quelques phrases..."></textarea>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-experience">
+          <h2>Expérience professionnelle</h2>
+          <div id="experience-list">
+            <div class="entry" data-index="0">
+              <div class="form-group">
+                <label>Poste</label>
+                <input type="text" class="exp-title" placeholder="Développeur Senior">
+              </div>
+              <div class="form-group">
+                <label>Entreprise</label>
+                <input type="text" class="exp-company" placeholder="Tech Corp">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date début</label>
+                  <input type="month" class="exp-start">
+                </div>
+                <div class="form-group">
+                  <label>Date fin</label>
+                  <input type="month" class="exp-end">
+                  <label class="checkbox-label">
+                    <input type="checkbox" class="exp-current"> Poste actuel
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea class="exp-desc" rows="3" placeholder="Décrivez vos responsabilités..."></textarea>
+              </div>
+              <button class="btn-remove" onclick="removeEntry(this, 'experience')">Supprimer</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addExperience()">+ Ajouter une expérience</button>
+        </div>
+
+        <div class="tab-content" id="tab-education">
+          <h2>Formation</h2>
+          <div id="education-list">
+            <div class="entry" data-index="0">
+              <div class="form-group">
+                <label>Diplôme</label>
+                <input type="text" class="edu-degree" placeholder="Master en Informatique">
+              </div>
+              <div class="form-group">
+                <label>Établissement</label>
+                <input type="text" class="edu-school" placeholder="Université Paris-Saclay">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date début</label>
+                  <input type="month" class="edu-start">
+                </div>
+                <div class="form-group">
+                  <label>Date fin</label>
+                  <input type="month" class="edu-end">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea class="edu-desc" rows="2" placeholder="Mentions, spécialités..."></textarea>
+              </div>
+              <button class="btn-remove" onclick="removeEntry(this, 'education')">Supprimer</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addEducation()">+ Ajouter une formation</button>
+        </div>
+
+        <div class="tab-content" id="tab-skills">
+          <h2>Compétences</h2>
+          <div id="skills-list">
+            <div class="skill-entry" data-index="0">
+              <input type="text" class="skill-name" placeholder="JavaScript">
+              <select class="skill-level">
+                <option value="1">1 - Débutant</option>
+                <option value="2">2 - Élémentaire</option>
+                <option value="3" selected>3 - Intermédiaire</option>
+                <option value="4">4 - Avancé</option>
+                <option value="5">5 - Expert</option>
+              </select>
+              <button class="btn-remove small" onclick="removeEntry(this, 'skills')">×</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addSkill()">+ Ajouter une compétence</button>
+        </div>
+
+        <div class="tab-content" id="tab-languages">
+          <h2>Langues</h2>
+          <div id="languages-list">
+            <div class="skill-entry" data-index="0">
+              <input type="text" class="lang-name" placeholder="Anglais">
+              <select class="lang-level">
+                <option value="Débutant">Débutant</option>
+                <option value="Intermédiaire" selected>Intermédiaire</option>
+                <option value="Courant">Courant</option>
+                <option value="Natif">Natif</option>
+              </select>
+              <button class="btn-remove small" onclick="removeEntry(this, 'languages')">×</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addLanguage()">+ Ajouter une langue</button>
+        </div>
+
+        <div class="tab-content" id="tab-certifications">
+          <h2>Certifications</h2>
+          <div id="certifications-list">
+            <div class="entry" data-index="0">
+              <div class="form-group">
+                <label>Nom de la certification</label>
+                <input type="text" class="cert-name" placeholder="AWS Certified Developer">
+              </div>
+              <div class="form-group">
+                <label>Organisme</label>
+                <input type="text" class="cert-org" placeholder="Amazon Web Services">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Date d'obtention</label>
+                  <input type="month" class="cert-date">
+                </div>
+              </div>
+              <button class="btn-remove" onclick="removeEntry(this, 'certifications')">Supprimer</button>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addCertification()">+ Ajouter une certification</button>
+        </div>
+
+        <div class="tab-content" id="tab-template">
+          <h2>Template</h2>
+          <div class="form-group">
+            <label>Couleur principale</label>
+            <input type="color" id="primary-color" value="#2563eb">
+          </div>
+          <div class="form-group">
+            <label>Police</label>
+            <select id="font-family">
+              <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman</option>
+              <option value="Georgia, 'Times New Roman', Times, serif">Georgia</option>
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="'Courier New', Courier, monospace">Courier New</option>
+            </select>
+          </div>
+        </div>
+      </aside>
+
+      <main class="preview-area">
+        <div class="preview-toolbar">
+          <button onclick="exportPDF()">📄 Exporter en PDF</button>
+          <button onclick="window.print()">🖨️ Imprimer</button>
+          <button onclick="resetAll()">🔄 Réinitialiser</button>
+        </div>
+        <div class="preview-wrapper" id="cv-preview">
+          <div id="cv-content">
+            <div class="cv-header">
+              <div class="cv-photo" id="cv-photo"></div>
+              <div class="cv-header-text">
+                <h1 id="cv-name">VOTRE NOM</h1>
+                <h2 id="cv-title">Titre Professionnel</h2>
+                <div class="cv-contact">
+                  <span id="cv-email">email@example.com</span>
+                  <span id="cv-phone">+33 6 00 00 00 00</span>
+                  <span id="cv-address">Ville, Pays</span>
+                  <span id="cv-linkedin">linkedin</span>
+                  <span id="cv-website">siteweb.com</span>
+                </div>
+              </div>
+            </div>
+            <div class="cv-body">
+              <div class="cv-left">
+                <section id="cv-summary-section">
+                  <h3>Profil</h3>
+                  <p id="cv-summary">Votre résumé professionnel...</p>
+                </section>
+                <section id="cv-skills-section">
+                  <h3>Compétences</h3>
+                  <div id="cv-skills"></div>
+                </section>
+                <section id="cv-languages-section">
+                  <h3>Langues</h3>
+                  <div id="cv-languages"></div>
+                </section>
+              </div>
+              <div class="cv-right">
+                <section id="cv-experience-section">
+                  <h3>Expérience Professionnelle</h3>
+                  <div id="cv-experience"></div>
+                </section>
+                <section id="cv-education-section">
+                  <h3>Formation</h3>
+                  <div id="cv-education"></div>
+                </section>
+                <section id="cv-certifications-section">
+                  <h3>Certifications</h3>
+                  <div id="cv-certifications"></div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
