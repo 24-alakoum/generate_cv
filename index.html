@@ -3,71 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV Pro - Générateur de CV intelligent</title>
+  <title>CV Pro — Générateur intelligent</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
   <div class="app">
-    <header class="app-header">
-      <div class="header-inner">
-        <div class="header-logo">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <h1>CV Pro</h1>
+    <!-- TOP NAV -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-brand">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>CV Pro</span>
         </div>
-        <p class="header-sub">Générateur de CV & Lettre de motivation</p>
+
+        <nav class="topbar-nav" id="topnav">
+          <a href="#" class="nav-link active" data-tab="personal">Infos</a>
+          <a href="#" class="nav-link" data-tab="experience">Expérience</a>
+          <a href="#" class="nav-link" data-tab="education">Formation</a>
+          <a href="#" class="nav-link" data-tab="skills">Compétences</a>
+          <a href="#" class="nav-link" data-tab="projects">Projets</a>
+          <a href="#" class="nav-link" data-tab="languages">Langues</a>
+          <a href="#" class="nav-link" data-tab="certifications">Certifications</a>
+          <a href="#" class="nav-link" data-tab="template">Style</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button class="top-action" onclick="showPreviewTab('score')" title="Score">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </button>
+          <button class="top-action" onclick="showPreviewTab('cover')" title="Lettre">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </button>
+          <button class="top-action" onclick="exportPDF()" title="PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
+          </button>
+          <button class="top-action" onclick="resetAll()" title="Réinitialiser">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+
+        <button class="topbar-menu" onclick="toggleMobileNav()" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </header>
 
-    <div class="layout">
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar-toggle" onclick="toggleSidebar()">
-          <span></span><span></span><span></span>
-        </div>
-        <nav class="sidebar-tabs">
-          <button class="tab active" data-tab="personal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Infos</button>
-          <button class="tab" data-tab="experience"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Expérience</button>
-          <button class="tab" data-tab="education"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Formation</button>
-          <button class="tab" data-tab="skills"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg> Compétences</button>
-          <button class="tab" data-tab="projects"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Projets</button>
-          <button class="tab" data-tab="languages"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6M4 14l6-6 2-3"/><path d="M2 5h12M7 2h1"/></svg> Langues</button>
-          <button class="tab" data-tab="certifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg> Certifs</button>
-          <button class="tab" data-tab="template"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Style</button>
-        </nav>
-        <div class="sidebar-score" onclick="showScoreTab()">
-          <div class="score-ring">
-            <svg viewBox="0 0 36 36">
-              <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-              <path class="ring-fill" id="score-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="0, 100"/>
-            </svg>
-            <span id="score-badge">0</span>
-          </div>
-          <div class="score-label">Score CV</div>
-        </div>
-      </aside>
+    <!-- MAIN -->
+    <div class="main">
+      <!-- LEFT: FORM -->
+      <aside class="form-col">
+        <div class="form-scroll">
 
-      <div class="main-area">
-        <div class="tabs-bar">
-          <div class="tabs-group">
-            <button class="tab-form active" data-tab="personal">Infos</button>
-            <button class="tab-form" data-tab="experience">Exp.</button>
-            <button class="tab-form" data-tab="education">Form.</button>
-            <button class="tab-form" data-tab="skills">Comp.</button>
-            <button class="tab-form" data-tab="projects">Proj.</button>
-            <button class="tab-form" data-tab="languages">Lang.</button>
-            <button class="tab-form" data-tab="certifications">Cert.</button>
-            <button class="tab-form" data-tab="template">Style</button>
-          </div>
-          <div class="tabs-actions">
-            <button class="btn-icon" onclick="resetAll()" title="Réinitialiser">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-panels">
           <div class="panel active" id="panel-personal">
-            <h2>Informations personnelles</h2>
+            <div class="panel-head">
+              <h2>Informations</h2>
+              <span class="panel-badge" id="badge-personal">0%</span>
+            </div>
             <div class="field">
               <label for="fullname">Nom complet</label>
               <input type="text" id="fullname" placeholder="Jean Dupont">
@@ -96,68 +88,89 @@
                 <input type="url" id="linkedin" placeholder="linkedin.com/in/jeandupont">
               </div>
               <div class="field">
-                <label for="website">Site web / Portfolio</label>
+                <label for="website">Site web</label>
                 <input type="url" id="website" placeholder="jeandupont.com">
               </div>
             </div>
             <div class="field">
-              <label for="photo">Photo (optionnelle)</label>
+              <label for="photo">Photo</label>
               <input type="file" id="photo" accept="image/*">
             </div>
             <div class="field">
               <label for="summary">Résumé professionnel</label>
-              <textarea id="summary" rows="4" placeholder="Décrivez votre profil en quelques phrases. Incluez vos années d'expérience, domaines d'expertise et objectifs de carrière."></textarea>
-              <span class="field-hint">Un bon résumé augmente votre score ATS de 15%</span>
+              <textarea id="summary" rows="4" placeholder="Décrivez votre profil en quelques phrases..."></textarea>
+              <span class="field-hint">Un bon résumé avec mots-clés améliore votre score ATS</span>
             </div>
           </div>
 
           <div class="panel" id="panel-experience">
-            <h2>Expérience professionnelle</h2>
+            <div class="panel-head">
+              <h2>Expérience</h2>
+              <span class="panel-badge" id="badge-experience">0</span>
+            </div>
             <div id="experience-list"></div>
-            <button class="btn-add" onclick="addExperience()">+ Ajouter une expérience</button>
+            <button class="btn-add" onclick="addExperience()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-education">
-            <h2>Formation</h2>
+            <div class="panel-head">
+              <h2>Formation</h2>
+              <span class="panel-badge" id="badge-education">0</span>
+            </div>
             <div id="education-list"></div>
-            <button class="btn-add" onclick="addEducation()">+ Ajouter une formation</button>
+            <button class="btn-add" onclick="addEducation()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-skills">
-            <h2>Compétences</h2>
+            <div class="panel-head">
+              <h2>Compétences</h2>
+              <span class="panel-badge" id="badge-skills">0</span>
+            </div>
             <div id="skills-list"></div>
-            <button class="btn-add" onclick="addSkill()">+ Ajouter une compétence</button>
+            <button class="btn-add" onclick="addSkill()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-projects">
-            <h2>Projets</h2>
+            <div class="panel-head">
+              <h2>Projets</h2>
+              <span class="panel-badge" id="badge-projects">0</span>
+            </div>
             <div id="projects-list"></div>
-            <button class="btn-add" onclick="addProject()">+ Ajouter un projet</button>
+            <button class="btn-add" onclick="addProject()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-languages">
-            <h2>Langues</h2>
+            <div class="panel-head">
+              <h2>Langues</h2>
+              <span class="panel-badge" id="badge-languages">0</span>
+            </div>
             <div id="languages-list"></div>
-            <button class="btn-add" onclick="addLanguage()">+ Ajouter une langue</button>
+            <button class="btn-add" onclick="addLanguage()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-certifications">
-            <h2>Certifications</h2>
+            <div class="panel-head">
+              <h2>Certifications</h2>
+              <span class="panel-badge" id="badge-certifications">0</span>
+            </div>
             <div id="certifications-list"></div>
-            <button class="btn-add" onclick="addCertification()">+ Ajouter une certification</button>
+            <button class="btn-add" onclick="addCertification()">+ Ajouter</button>
           </div>
 
           <div class="panel" id="panel-template">
-            <h2>Personnalisation</h2>
+            <div class="panel-head">
+              <h2>Personnalisation</h2>
+            </div>
             <div class="field">
               <label>Couleur principale</label>
               <div class="color-row">
                 <input type="color" id="primary-color" value="#1a365d">
                 <input type="color" id="accent-color" value="#2b6cb0">
+                <input type="color" id="bg-color" value="#f0f4f8">
               </div>
             </div>
             <div class="field">
-              <label>Police du CV</label>
+              <label>Police</label>
               <select id="font-family">
                 <option value="Arial, Helvetica, sans-serif">Arial (ATS)</option>
                 <option value="'Times New Roman', Times, serif">Times New Roman</option>
@@ -165,7 +178,6 @@
                 <option value="'Segoe UI', sans-serif">Segoe UI</option>
                 <option value="'Calibri', sans-serif">Calibri</option>
               </select>
-              <span class="field-hint">Arial et Times New Roman sont les meilleures polices pour les ATS</span>
             </div>
             <div class="field">
               <label>Mise en page</label>
@@ -175,216 +187,148 @@
               </select>
             </div>
             <div class="field">
-              <label>Inclure la photo dans le CV</label>
-              <label class="toggle">
-                <input type="checkbox" id="show-photo-cv" checked>
-                <span class="toggle-slider"></span>
+              <label class="toggle-label">
+                <span>Afficher la photo</span>
+                <label class="toggle">
+                  <input type="checkbox" id="show-photo-cv">
+                  <span class="toggle-slider"></span>
+                </label>
               </label>
             </div>
           </div>
+
+        </div>
+      </aside>
+
+      <!-- RIGHT: PREVIEW -->
+      <main class="preview-col">
+        <div class="preview-toolbar">
+          <div class="preview-switch">
+            <button class="pv-btn active" onclick="showPreviewTab('cv')">CV</button>
+            <button class="pv-btn" onclick="showPreviewTab('cover')">Lettre</button>
+            <button class="pv-btn" onclick="showPreviewTab('score')">Score</button>
+          </div>
+          <div class="pv-score-badge" onclick="showPreviewTab('score')" title="Score CV">
+            <svg width="14" height="14" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+              <circle id="pv-score-ring" cx="18" cy="18" r="16" fill="none" stroke="#1a365d" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 100.531" transform="rotate(-90 18 18)"/>
+            </svg>
+            <span id="pv-score-num">0</span>
+          </div>
         </div>
 
-        <div class="preview-container">
-          <div class="preview-header">
-            <div class="preview-tabs">
-              <button class="preview-tab active" onclick="switchPreview('cv')">CV</button>
-              <button class="preview-tab" onclick="switchPreview('cover')">Lettre de motivation</button>
-              <button class="preview-tab" onclick="switchPreview('score')">Score</button>
-            </div>
-            <div class="preview-actions">
-              <button onclick="exportPDF()" title="Exporter en PDF">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
-                PDF
-              </button>
-              <button onclick="printCV()" title="Imprimer">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              </button>
+        <div class="preview-stage">
+          <!-- CV -->
+          <div class="preview-page active" id="page-cv">
+            <div id="cv-content">
+              <div class="cv-header">
+                <div class="cv-header-top">
+                  <div class="cv-photo" id="cv-photo"></div>
+                  <div>
+                    <h1 id="cv-name">VOTRE NOM</h1>
+                    <p class="cv-subtitle" id="cv-title">Titre Professionnel</p>
+                  </div>
+                </div>
+                <div class="cv-contact" id="cv-contact">
+                  <span id="cv-email">email@example.com</span>
+                  <span id="cv-phone">+33 6 00 00 00 00</span>
+                  <span id="cv-address">Ville, Pays</span>
+                  <span id="cv-linkedin">linkedin</span>
+                  <span id="cv-website">siteweb.com</span>
+                </div>
+              </div>
+              <div class="cv-body" id="cv-body">
+                <section id="cv-summary-section">
+                  <h2>Profil</h2>
+                  <p id="cv-summary">Votre résumé professionnel...</p>
+                </section>
+                <section id="cv-experience-section">
+                  <h2>Expérience Professionnelle</h2>
+                  <div id="cv-experience"></div>
+                </section>
+                <section id="cv-education-section">
+                  <h2>Formation</h2>
+                  <div id="cv-education"></div>
+                </section>
+                <section id="cv-projects-section">
+                  <h2>Projets</h2>
+                  <div id="cv-projects"></div>
+                </section>
+                <section id="cv-skills-section">
+                  <h2>Compétences</h2>
+                  <div id="cv-skills"></div>
+                </section>
+                <section id="cv-languages-section">
+                  <h2>Langues</h2>
+                  <div id="cv-languages"></div>
+                </section>
+                <section id="cv-certifications-section">
+                  <h2>Certifications</h2>
+                  <div id="cv-certifications"></div>
+                </section>
+              </div>
             </div>
           </div>
 
-          <div class="preview-stage">
-            <div class="preview-frame active" id="preview-cv">
-              <div id="cv-content">
-                <div class="cv-header">
-                  <div class="cv-header-top">
-                    <div class="cv-photo" id="cv-photo"></div>
-                    <div>
-                      <h1 id="cv-name">VOTRE NOM</h1>
-                      <p class="cv-title" id="cv-title">Titre Professionnel</p>
-                    </div>
-                  </div>
-                  <div class="cv-contact" id="cv-contact">
-                    <span id="cv-email">email@example.com</span>
-                    <span id="cv-phone">+33 6 00 00 00 00</span>
-                    <span id="cv-address">Ville, Pays</span>
-                    <span id="cv-linkedin">linkedin</span>
-                    <span id="cv-website">siteweb.com</span>
-                  </div>
-                </div>
-                <div class="cv-body" id="cv-body">
-                  <section id="cv-summary-section">
-                    <h2>Profil</h2>
-                    <p id="cv-summary">Votre résumé professionnel...</p>
-                  </section>
-                  <section id="cv-experience-section">
-                    <h2>Expérience Professionnelle</h2>
-                    <div id="cv-experience"></div>
-                  </section>
-                  <section id="cv-education-section">
-                    <h2>Formation</h2>
-                    <div id="cv-education"></div>
-                  </section>
-                  <section id="cv-projects-section">
-                    <h2>Projets</h2>
-                    <div id="cv-projects"></div>
-                  </section>
-                  <section id="cv-skills-section">
-                    <h2>Compétences</h2>
-                    <div id="cv-skills"></div>
-                  </section>
-                  <section id="cv-languages-section">
-                    <h2>Langues</h2>
-                    <div id="cv-languages"></div>
-                  </section>
-                  <section id="cv-certifications-section">
-                    <h2>Certifications</h2>
-                    <div id="cv-certifications"></div>
-                  </section>
-                </div>
+          <!-- COVER LETTER -->
+          <div class="preview-page" id="page-cover">
+            <div class="cover-form" id="cover-form">
+              <h2>Générer une lettre de motivation</h2>
+              <div class="field">
+                <label>Intitulé du poste</label>
+                <input type="text" id="job-title" placeholder="Développeur Full Stack Senior">
               </div>
+              <div class="field">
+                <label>Entreprise</label>
+                <input type="text" id="job-company" placeholder="Tech Corp">
+              </div>
+              <div class="field">
+                <label>Description du poste</label>
+                <textarea id="job-description" rows="5" placeholder="Collez la description ici..."></textarea>
+              </div>
+              <div class="field">
+                <label>Recruteur (optionnel)</label>
+                <input type="text" id="job-recruiter" placeholder="Mme Dupont">
+              </div>
+              <button class="btn-gen" onclick="generateCoverLetter()">Générer la lettre</button>
             </div>
-
-            <div class="preview-frame" id="preview-cover">
-              <div class="cover-form">
-                <h2>Générer une lettre de motivation</h2>
-                <div class="field">
-                  <label>Intitulé du poste</label>
-                  <input type="text" id="job-title" placeholder="Développeur Full Stack Senior">
-                </div>
-                <div class="field">
-                  <label>Nom de l'entreprise</label>
-                  <input type="text" id="job-company" placeholder="Tech Corp">
-                </div>
-                <div class="field">
-                  <label>Offre d'emploi (description)</label>
-                  <textarea id="job-description" rows="6" placeholder="Collez la description du poste ici..."></textarea>
-                </div>
-                <div class="field">
-                  <label>Nom du recruteur (optionnel)</label>
-                  <input type="text" id="job-recruiter" placeholder="Mme Dupont">
-                </div>
-                <button class="btn-generate" onclick="generateCoverLetter()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-                  Générer la lettre
-                </button>
+            <div id="cover-result" style="display:none;">
+              <div class="cover-bar">
+                <button class="btn-sm" onclick="exportCoverPDF()">Télécharger PDF</button>
+                <button class="btn-sm ghost" onclick="backToCoverForm()">Modifier</button>
               </div>
-              <div id="cover-result" style="display:none;">
-                <div class="cover-actions">
-                  <button onclick="exportCoverPDF()" class="btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
-                    Télécharger la lettre
-                  </button>
-                  <button onclick="document.getElementById('cover-result').style.display='none';document.querySelector('.cover-form').style.display='block'" class="btn-ghost">Modifier</button>
-                </div>
-                <div id="cover-letter-content" class="cover-letter"></div>
-              </div>
+              <div id="cover-letter-content" class="cover-letter"></div>
             </div>
+          </div>
 
-            <div class="preview-frame" id="preview-score">
-              <div class="score-page">
-                <div class="score-hero">
-                  <div class="score-circle" id="score-circle">
-                    <svg viewBox="0 0 120 120">
-                      <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" stroke-width="8"/>
-                      <circle id="score-arc" cx="60" cy="60" r="54" fill="none" stroke="#1a365d" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 339.292" transform="rotate(-90 60 60)"/>
-                    </svg>
-                    <div class="score-value">
-                      <span id="score-number">0</span>
-                      <small>/100</small>
-                    </div>
-                  </div>
-                  <div class="score-meta">
-                    <div class="score-grade" id="score-grade">En attente</div>
-                    <p id="score-summary-text">Remplissez votre CV pour obtenir une évaluation</p>
+          <!-- SCORE -->
+          <div class="preview-page" id="page-score">
+            <div class="score-page">
+              <div class="score-hero">
+                <div class="score-ring-big">
+                  <svg viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="8"/>
+                    <circle id="score-arc" cx="60" cy="60" r="54" fill="none" stroke="#1a365d" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 339.292" transform="rotate(-90 60 60)"/>
+                  </svg>
+                  <div class="score-val">
+                    <span id="score-number">0</span>
+                    <small>/100</small>
                   </div>
                 </div>
-
-                <div class="score-breakdown" id="score-breakdown">
-                  <div class="score-item" data-cat="personal">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Informations personnelles</span>
-                      <span class="score-item-pct" id="sc-personal">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-personal" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-personal"></div>
-                  </div>
-                  <div class="score-item" data-cat="summary">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Résumé professionnel</span>
-                      <span class="score-item-pct" id="sc-summary">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-summary" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-summary"></div>
-                  </div>
-                  <div class="score-item" data-cat="experience">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Expérience</span>
-                      <span class="score-item-pct" id="sc-experience">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-experience" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-experience"></div>
-                  </div>
-                  <div class="score-item" data-cat="education">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Formation</span>
-                      <span class="score-item-pct" id="sc-education">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-education" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-education"></div>
-                  </div>
-                  <div class="score-item" data-cat="skills">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Compétences</span>
-                      <span class="score-item-pct" id="sc-skills">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-skills" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-skills"></div>
-                  </div>
-                  <div class="score-item" data-cat="languages">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Langues</span>
-                      <span class="score-item-pct" id="sc-languages">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-languages" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-languages"></div>
-                  </div>
-                  <div class="score-item" data-cat="certifications">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Certifications</span>
-                      <span class="score-item-pct" id="sc-certifications">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-certifications" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-certifications"></div>
-                  </div>
-                  <div class="score-item" data-cat="ats">
-                    <div class="score-item-header">
-                      <span class="score-item-name">Compatibilité ATS</span>
-                      <span class="score-item-pct" id="sc-ats">0%</span>
-                    </div>
-                    <div class="score-bar"><div class="score-fill" id="sc-bar-ats" style="width:0%"></div></div>
-                    <div class="score-item-detail" id="scd-ats"></div>
-                  </div>
+                <div>
+                  <div class="score-grade" id="score-grade">—</div>
+                  <p class="score-desc" id="score-summary-text">Remplissez votre CV pour obtenir une évaluation</p>
                 </div>
-
-                <div class="score-tips" id="score-tips">
-                  <h3>Conseils pour améliorer votre CV</h3>
-                  <ul id="score-tips-list"></ul>
-                </div>
+              </div>
+              <div class="score-grid" id="score-breakdown"></div>
+              <div class="score-tips" id="score-tips">
+                <h3>Conseils d'amélioration</h3>
+                <ul id="score-tips-list"></ul>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 
