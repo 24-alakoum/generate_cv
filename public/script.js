@@ -92,6 +92,7 @@ function enterApp() {
   document.getElementById('admin-btn').style.display = USER.role === 'admin' ? 'block' : 'none';
   updateCredits();
   loadCVList();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function toggleUserMenu() {
@@ -134,9 +135,16 @@ async function loadCVList() {
   if (!grid) return;
   try {
     const cvs = await apiCall('GET', '/cvs');
+
+    // Update stats
+    document.getElementById('stat-cv-count').textContent = cvs.length;
+    document.getElementById('stat-credits').textContent = USER?.credits || 0;
+    document.getElementById('stat-score').textContent = cvs.length > 0 ? '✓' : '—';
+    document.getElementById('stat-recent').textContent = cvs.length > 0 ? cvs[0].updated_at?.slice(0,10) || '—' : '—';
+
     if (cvs.length === 0) {
       grid.innerHTML = `<div class="dash-empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <i data-lucide="file-text" class="w-14 h-14" style="color:var(--text3)"></i>
         <h3>Aucun CV pour le moment</h3>
         <p>Créez votre premier CV</p>
         <button class="btn-primary" onclick="closeDashboard()">Créer un CV</button>
@@ -144,16 +152,21 @@ async function loadCVList() {
       return;
     }
     grid.innerHTML = cvs.map(cv => `
-      <div class="dash-card" onclick="loadCV('${cv.id}')">
-        <h3>${cv.name}</h3>
-        <p>Template: ${cv.template}</p>
-        <div class="dash-meta"><span>${cv.created_at}</span></div>
+      <div class="dash-card group" onclick="loadCV('${cv.id}')">
+        <div class="flex items-start justify-between mb-3">
+          <h3 class="font-semibold text-[15px]">${cv.name}</h3>
+          <span class="px-2 py-0.5 rounded text-xs font-medium" style="background:rgba(43,108,176,0.08);color:var(--primary)">${cv.template}</span>
+        </div>
+        <div class="flex items-center gap-3 text-xs" style="color:var(--text3)">
+          <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i>${cv.created_at?.slice(0,10) || ''}</span>
+        </div>
         <div class="dash-actions">
-          <button class="btn-sm" onclick="event.stopPropagation();loadCV('${cv.id}')">Ouvrir</button>
-          <button class="btn-sm ghost" onclick="event.stopPropagation();deleteCV('${cv.id}')" style="color:#e53e3e">Supprimer</button>
+          <button class="btn-sm" onclick="event.stopPropagation();loadCV('${cv.id}')"><i data-lucide="eye" class="w-3.5 h-3.5 inline-block mr-1.5"></i>Ouvrir</button>
+          <button class="btn-sm ghost" onclick="event.stopPropagation();deleteCV('${cv.id}')" style="color:#e53e3e"><i data-lucide="trash-2" class="w-3.5 h-3.5 inline-block mr-1.5"></i>Supprimer</button>
         </div>
       </div>
     `).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   } catch (e) {
     showToast('Erreur chargement CVs', 'error');
   }
@@ -322,6 +335,7 @@ async function loadAdminData() {
       ${payments.map(p => `<tr><td>${p.user_email}</td><td>${p.amount/100}€</td><td>${p.credits}</td><td>${p.created_at}</td></tr>`).join('')}
       </table>` : '<p>Aucun paiement</p>';
 
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   } catch (e) {
     showToast('Erreur chargement admin', 'error');
   }
@@ -333,14 +347,16 @@ function showPaymentModal() {
   document.getElementById('modal-credits').textContent = USER.credits || 0;
 
   const plansEl = document.getElementById('plans-list');
-  const plans = { starter: { name: 'Starter', credits: 5, price: '4,99' }, pro: { name: 'Pro', credits: 15, price: '9,99' }, unlimited: { name: 'Illimité', credits: 50, price: '19,99' } };
+  const plans = { starter: { name: 'Starter', credits: 5, price: '4,99', icon: 'zap' }, pro: { name: 'Pro', credits: 15, price: '9,99', icon: 'star' }, unlimited: { name: 'Illimité', credits: 50, price: '19,99', icon: 'infinity' } };
   plansEl.innerHTML = Object.entries(plans).map(([key, p]) => `
     <div class="plan-card" onclick="buyPlan('${key}')">
+      <i data-lucide="${p.icon}" class="w-5 h-5 mx-auto mb-2" style="color:var(--primary)"></i>
       <div class="plan-name">${p.name}</div>
       <div class="plan-credits">${p.credits}</div>
       <div class="plan-price">${p.price}€ <small>HT</small></div>
     </div>
   `).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function closePaymentModal(e) {
@@ -386,6 +402,7 @@ if (isLoggedIn() && USER) {
 // ========== NAV ==========
 document.querySelectorAll('.nav-link').forEach(link => {
   link.addEventListener('click', e => {
+    if (link.dataset.tab === 'dashboard') return;
     e.preventDefault();
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -1131,6 +1148,7 @@ function generateCoverLetter() {
   document.getElementById('cover-form-card').style.display = 'none';
   document.getElementById('cover-result').style.display = 'block';
   showTab('cover');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function backToCoverForm() {
@@ -1157,7 +1175,7 @@ function exportCoverPDF() {
 
 function genPDF(el, filename) {
   const btn = document.querySelector('.top-action[title="Exporter PDF"]');
-  if (btn) { btn.innerHTML = '...'; btn.style.opacity = '0.6'; }
+  if (btn) { btn.innerHTML = '<span class="spinner"></span>'; btn.style.opacity = '0.6'; }
   html2pdf().set({
     margin: [10, 10, 10, 10],
     filename: filename,
@@ -1165,9 +1183,9 @@ function genPDF(el, filename) {
     html2canvas: { scale: 2, useCORS: true, logging: false },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   }).from(el).save().then(() => {
-    if (btn) { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>'; btn.style.opacity = '1'; }
+    if (btn) { btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i>'; btn.style.opacity = '1'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
   }).catch(() => {
-    if (btn) { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>'; btn.style.opacity = '1'; }
+    if (btn) { btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i>'; btn.style.opacity = '1'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
   });
 }
 
@@ -1219,6 +1237,9 @@ for (const [k, name] of Object.entries(CAT_NAMES)) {
     '<div class="s-item" data-cat="' + k + '"><div class="s-item-h"><span>' + name + '</span><span class="pct">0%</span></div>' +
     '<div class="s-bar"><div class="s-fill" style="width:0%"></div></div><div class="s-item-d"></div></div>';
 }
+
+// Initialize Lucide icons
+if (typeof lucide !== 'undefined') lucide.createIcons();
 
 // Load saved data first
 loadState();
